@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Convert to Grayscale</title>
+
+    <script type="module">
+      //import the library to talk to imagemagick
+      import * as Magick from "https://knicknic.github.io/wasm-imagemagick/magickApi.js";
+
+      function fromBinary(binary) {
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < bytes.length; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        return String.fromCharCode(...new Uint16Array(bytes.buffer));
+      }
+
+      function getSize(n) {
+        const match = n.match(/(=+)/);
+        const padding = match ? match[0] : "";
+        return n.length * (3 / 4) - padding.length;
+      }
+
+      // ...
+
+      // Fetch the image to rotate, and call image magick
+      //https://images.unsplash.com/photo-1553697584-84c17c88a54c?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&dl=spencer-davis-qw6qQQyYQpo-unsplash.jpg
+
+      let DoMagickCall = async function (content) {
+        const start = window.performance.now();
+        const image = { name: "image.jpg", content };
+
+        const command = [
+          "convert",
+          "image.jpg",
+          "-strip",
+          "-interlace",
+          "Plane",
+          "-gaussian-blur",
+          "0.05",
+          "-quality",
+          "10%",
+          "-resize",
+          "60x60",
+          "-colorspace",
+          "GRAY",
+          "out.png",
+        ];
+
+        const result = await Magick.call([image], command);
+        const end = window.performance.now();
+        const time = end - start;
+        const src =
+          "data:image/gif;base64," +
+          btoa(String.fromCharCode.apply(null, result.outputFiles[0].buffer));
+        document.querySelector("#image").src = src;
+        document.querySelector("#bytes").textContent = "bytes: " + getSize(src);
+        document.querySelector("#time").textContent = "took: " + time + "ms";
+      };
+
+      document.querySelector("#inputFile").addEventListener("change", (e) => {
+        const reader = new FileReader();
+        reader.onload = function () {
+          DoMagickCall(new Uint8Array(reader.result));
+        };
+
+        reader.readAsArrayBuffer(e.target.files[0]);
+      });
+    </script>
+  </head>
+  <body>
+    <img src="" id="image" />
+    <div id="bytes"></div>
+    <div id="time"></div>
+    <input type="file" id="inputFile" />
+  </body>
+  <style>
+    #image {
+      width: 200px;
+    }
+  </style>
+</html>

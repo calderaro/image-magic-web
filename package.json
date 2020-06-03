@@ -1,0 +1,17 @@
+{
+  "name": "image-magic-web",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "web",
+    "imageMagick",
+    "wasm",
+    "convert"
+  ],
+  "author": "angel calderaro",
+  "license": "ISC"
+}
